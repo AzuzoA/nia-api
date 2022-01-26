@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rami.nia.base.repository.ApMapper">
+
+    <select id="selectApInfo" parameterType="apReq" resultType="underColumnMap">
+        SELECT AP_MAC
+        , AP_SERIAL
+        , AP_VENDOR
+        , AP_MODEL
+        , AP_NAME
+        , AP_REG_TIME
+        , AP_SIDO
+        , AP_SIGUNGU
+        , AP_DONG
+        , AP_LOCATION
+        , AP_LAT
+        , AP_LNG
+        , AP_DESCRIPTION
+        FROM NIA.N_AP_INFO
+        <where>
+            <if test=" ap_mac != null and ap_mac != '' ">
+                and AP_MAC = #{ap_mac}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertApInfo" parameterType="apReq">
+        INSERT INTO NIA.N_AP_INFO
+        (AP_MAC, AP_NAME, AP_SIDO, AP_SIGUNGU, AP_DONG, AP_LOCATION, AP_LAT, AP_LNG, AP_DESCRIPTION, AP_MEMO, REGI_DT, REGI_ID)
+        VALUES(#{ap_mac}, #{ap_name}, #{ap_sido}, #{ap_sigungu}, #{ap_dong}, #{ap_location}, #{ap_lat}, #{ap_lng}, #{ap_description}, #{ap_memo}, now(), #{regi_id});
+    </insert>
+
+    <update id="updateApInfo" parameterType="apReq">
+        UPDATE NIA.N_AP_INFO
+        SET UPDT_DT = now(), UPDT_ID = #{updt_id}
+        <if test=" ap_name != null and ap_name != '' ">
+            , AP_NAME = #{ap_name}
+        </if>
+        <if test=" ap_sido != null and ap_sido != '' ">
+            , AP_SIDO = #{ap_sido}
+        </if>
+        <if test=" ap_sigungu != null and ap_sigungu != '' ">
+            , AP_SIGUNGU = #{ap_sigungu}
+        </if>
+        <if test=" ap_dong != null and ap_dong != '' ">
+            , AP_DONG = #{ap_dong}
+        </if>
+        <if test=" ap_location != null and ap_location != '' ">
+            , AP_LOCATION = #{ap_location}
+        </if>
+        <if test=" ap_lat != null and ap_lat != '' ">
+            , AP_LAT = #{ap_lat}
+        </if>
+        <if test=" ap_lng != null and ap_lng != '' ">
+            , AP_LNG = #{ap_lng}
+        </if>
+        <if test=" ap_description != null and ap_description != '' ">
+            , AP_DESCRIPTION = #{ap_description}
+        </if>
+        <if test=" ap_memo != null and ap_memo != '' ">
+            , AP_MEMO = #{ap_memo}
+        </if>
+        WHERE AP_MAC = #{ap_mac}
+    </update>
+
+    <select id="getApInfoList" parameterType="apReq" resultType="underColumnMap">
+        SELECT DISTINCT ON(A.AP_MAC) A.AP_MAC
+        , A.AP_SERIAL
+        , A.AP_VENDOR
+        , A.AP_MODEL
+        , A.AP_NAME
+        , A.AP_REG_TIME
+        , A.AP_SIDO
+        , A.AP_SIGUNGU
+        , A.AP_DONG
+        , A.AP_LOCATION
+        , A.AP_LAT
+        , A.AP_LNG
+        , A.AP_DESCRIPTION
+        , B.AP_STATUS
+        , B.AP_LASTSEEN
+        , B.AP_CPU
+        , B.AP_MEMORY
+        , B.AP_LATENCY
+        , B.AP_MEMO
+        , B.AP_IP
+        FROM NIA.N_AP_INFO A
+        LEFT JOIN NIA.N_AP_ST_LOG B ON A.AP_MAC = B.AP_MAC
+        where 1 = 1
+        <if test=" ap_mac != null and ap_mac != '' ">
+            and A.AP_MAC = #{ap_mac}
+        </if>
+        ORDER BY A.AP_MAC, B.AP_LASTSEEN DESC
+    </select>
+
+    <select id="getApAlarmInfoList" parameterType="apReq" resultType="underColumnMap">
+        SELECT TO_CHAR(COL_DATE, 'YYYY-MM-DD HH24:MI:SS') AS COL_DATE
+        , AP_MAC
+        , REG_TIME
+        , CODE
+        , TYPE
+        , STATUS
+        , SEVERITY
+        , MEMO
+        , ACK
+        , ACK_TIME
+        , ACK_USER
+        , ACK_TYPE
+        , CLS_MEMO
+        , CLS_TIME
+        , CLS_USER
+        FROM NIA.N_AP_OBSTC_LOG
+        where 1 = 1
+        <if test=" ap_mac != null and ap_mac != '' ">
+            and AP_MAC = #{ap_mac}
+        </if>
+        <choose>
+            <when test=" start_date != null and start_date != '' and end_date != null and end_date != '' ">
+                AND COL_DATE BETWEEN TO_TIMESTAMP(#{start_date}, 'YYYYMMDDHH24MI') AND TO_TIMESTAMP(#{end_date},
+                'YYYYMMDDHH24MI')
+            </when>
+            <otherwise>
+                AND COL_DATE BETWEEN now()-interval '2 hour' AND now()
+            </otherwise>
+        </choose>
+        ORDER BY COL_DATE DESC
+    </select>
+
+    <select id="getApTrafficClient" parameterType="apReq" resultType="underColumnMap">
+        SELECT TO_CHAR(COL_DATE, 'YYYY-MM-DD HH24:MI:SS') AS COL_DATE
+        , AP_MAC
+        , SSID_NAME
+        , AUTH_TYPE
+        , RX
+        , TX
+        , CLIENT
+        , CLI_AUTH
+        FROM NIA.N_AP_TRFC_INFO
+        where 1 = 1
+        <if test=" ap_mac != null and ap_mac != '' ">
+            and AP_MAC = #{ap_mac}
+        </if>
+        <choose>
+            <when test=" start_date != null and start_date != '' and end_date != null and end_date != '' ">
+                AND COL_DATE BETWEEN TO_TIMESTAMP(#{start_date}, 'YYYYMMDDHH24MI') AND TO_TIMESTAMP(#{end_date},
+                'YYYYMMDDHH24MI')
+            </when>
+            <otherwise>
+                AND COL_DATE BETWEEN now()-interval '2 hour' AND now()
+            </otherwise>
+        </choose>
+        ORDER BY COL_DATE DESC
+    </select>
+
+    <insert id="setApReset" parameterType="apReq">
+        INSERT INTO NIA.N_AP_REBOOT_LOG
+            (AP_MAC, RQST_TYPE, RESULT, INSERT_DT)
+        VALUES (#{ap_mac}, 'request', 'OK', now())
+    </insert>
+
+    <select id="getClientHistory" parameterType="apReq" resultType="underColumnMap">
+        SELECT TO_CHAR(CON_DATE, 'YYYY-MM-DD HH24:MI:SS') AS CON_DATE
+        , TO_CHAR(DISCON_DATE, 'YYYY-MM-DD HH24:MI:SS') AS DISCON_DATE
+        , CLI_MAC
+        , AP_MAC
+        , SSID_NAME
+        , AUTH_TYPE
+        , RX
+        , TX
+        , MEMO
+        FROM NIA.N_AP_CLNT_INFO
+        where 1 = 1
+        <if test=" ap_mac != null and ap_mac != '' ">
+            and AP_MAC = #{ap_mac}
+        </if>
+        <if test=" cli_mac != null and cli_mac != '' ">
+            and CLI_MAC = #{cli_mac}
+        </if>
+        <choose>
+            <when test=" start_date != null and start_date != '' and end_date != null and end_date != '' ">
+                AND CON_DATE BETWEEN TO_TIMESTAMP(#{start_date}, 'YYYYMMDDHH24MI') AND TO_TIMESTAMP(#{end_date},
+                'YYYYMMDDHH24MI')
+            </when>
+            <otherwise>
+                AND CON_DATE BETWEEN now()-interval '2 hour' AND now()
+            </otherwise>
+        </choose>
+        ORDER BY CON_DATE DESC
+    </select>
+
+    <select id="getCtrlStatus" parameterType="apReq" resultType="underColumnMap">
+        SELECT TO_CHAR(COL_DATE, 'YYYY-MM-DD HH24:MI:SS') AS COL_DATE
+        , CTRL_ID
+        , CTRL_NAME
+        , CTRL_CPU
+        , CTRL_MEMORY
+        , CTRL_DISK
+        FROM NIA.N_CLNT_ST_LOG
+        where 1 = 1
+        <choose>
+            <when test=" start_date != null and start_date != '' and end_date != null and end_date != '' ">
+                AND COL_DATE BETWEEN TO_TIMESTAMP(#{start_date}, 'YYYYMMDDHH24MI') AND TO_TIMESTAMP(#{end_date},
+                'YYYYMMDDHH24MI')
+            </when>
+            <otherwise>
+                AND COL_DATE BETWEEN now()-interval '2 hour' AND now()
+            </otherwise>
+        </choose>
+        ORDER BY COL_DATE DESC
+    </select>
+
+</mapper>

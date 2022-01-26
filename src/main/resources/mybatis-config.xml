@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="callSettersOnNulls" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <typeAlias alias="camelMap" type="com.rami.nia.base.utils.CamelMap"/>
+        <typeAlias alias="underColumnMap" type="com.rami.nia.base.utils.UnderColumnMap"/>
+
+        <typeAlias alias="apReq" type="com.rami.nia.base.model.ApReq"/>
+    </typeAliases>
+
+    <typeHandlers>
+    </typeHandlers>
+
+</configuration>

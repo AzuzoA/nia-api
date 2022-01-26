@@ -1,0 +1,30 @@
+server:
+  port: 8480
+  servlet:
+    context-path: /
+  servlet-path: /*
+
+mybatis:
+  type-aliases-package: com.rami.nia
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+
+
+api:
+    nia: http://10.200.2.100
+
+spring:
+  datasource:
+    jdbc-url: jdbc:postgresql://192.168.0.200:5432/nms?currentSchema=nia
+    username: rami
+    password: hil0601)
+
+  # log
+logging:
+  level:
+    root: info
+    com.rami.nia: debug
+  config: classpath:logback-spring.xml
+
+
